@@ -1,9 +1,4 @@
 const { contextBridge, ipcRenderer } = require('electron');
-
-/**
- * Preload script — exposes a safe API to the renderer process.
- * No Node.js APIs leak to the browser context.
- */
 contextBridge.exposeInMainWorld('api', {
   // Products
   products: {
