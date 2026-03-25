@@ -1,285 +1,78 @@
-# Duka POS - Lightweight POS for Kenyan Small Retailers
+# Duka POS — Enterprise Migration Plan
 
-Duka POS is a simple, offline-first Point of Sale system designed for small retail shops (dukas) in Kenya. It focuses on core functionalities like sales, inventory management, and receipt printing, with optional M-Pesa integration for cashless transactions.
+This repository hosts Duka POS, a lightweight, offline-first Point of Sale system for Kenyan small retailers (dukas). We are migrating toward an enterprise-grade, TypeScript-first architecture with a scalable folder structure, strong typing, and a modern UI.
 
-## Key Features (MVP)
+## What Duka POS is (MVP context)
+- Lightweight, software-only POS targeted at small retail shops and dukas in Kenya
+- Core features: sales, inventory, and receipt printing (USB ESC/POS)
+- Offline-first with optional online payment flow (M-Pesa) when connected
+- One-time license model ($400) for MVP; future enhancements may include cloud features and multi-device sync
 
-*   **Sales Register:** Process sales with cash and M-Pesa (online/queued).
-*   **Inventory Management:** Track product stock levels with basic alerts.
-*   **Receipt Printing:** Supports USB ESC/POS compatible thermal receipt printers.
-*   **Offline-First:** Core operations function reliably even with intermittent internet.
-*   **Simplicity:** User-friendly interface for quick adoption by shop owners.
-*   **License:** One-time $400 software license.
+## Current MVP status
+- Core MVP implemented: Sales register, inventory tracking, receipts (printer path stub), and SQLite-backed data store
+- MVP UI scaffold using React; IPC wiring for product and sale flows is in place
+- M-Pesa and printer integration are ready as paths to wire but currently implemented as stubs for MVP testing
+- Enterprise migration roadmap created and committed
 
-## Tech Stack
+## Tech stack (current MVP + target)
+- Runtime: Electron (Windows-first) and Node.js
+- Frontend: React 18, TSX planned for enterprise; TailwindCSS
+- Database: SQLite via better-sqlite3
+- IPC: Electron IPC between main and renderer; strong type layer to be introduced in TS
+- Printer: ESC/POS via node-thermal-printer (when wired in)
+- Payments: Safaricom Daraja API; offline queue for MPesa;
+- Quality: ESLint + Prettier configuration; path aliases; error boundaries
 
-*   **Runtime:** Electron 28+ (for cross-platform desktop applications)
-*   **Frontend:** React 18 + TailwindCSS (for a clean, responsive UI)
-*   **State Management:** Zustand (lightweight, minimal boilerplate)
-*   **Database:** `better-sqlite3` (fast, synchronous, file-based for offline-first)
-*   **Printer Integration:** `node-thermal-printer` (for ESC/POS commands over USB)
-*   **Payments:** Safaricom Daraja API (M-Pesa) integration (online, with offline queuing)
-*   **Build:** `electron-builder` (for Windows NSIS installer)
+## Enterprise folder structure (planned in TS)
+- src/
+  - main/                (Electron main processes, TS)
+  - renderer/            (React TSX app, TS config)
+  - shared/              (types and utilities shared between main and renderer)
+    - types/
+  - ipc/                 (Typed IPC contracts and handlers)
+  - db/                  (Typed DAOs or ORM-like wrappers for SQLite)
+  - services/            (Business logic services)
+  - hooks/               (React hooks)
+  - components/          (Reusable UI components)
+  - pages/               (Route-based screens)
+  - utils/               (Helper utilities, formatters, etc.)
+  - assets/              (Icons, images, design tokens)
+- .env, tsconfig.json, eslint.config.js, prettier.config.js
 
-## Folder Structure
+## Prioritized, phased build plan (enterprise)
+- Phase 1 — Foundations (2–3 weeks)
+  - Introduce TS across the codebase: tsconfig, ESLint, Prettier, path aliases
+  - Create enterprise skeleton folders and module boundaries (src/main, src/renderer, src/shared, src/ipc, src/db, src/services, src/hooks, src/components, src/pages, src/utils)
+  - Convert MVP bootstrapping to TS (Electron main and renderer entry points)
+  - Basic design tokens and a dark/light mode toggle
+  - Add type definitions for DB rows, IPC messages, and errors
+- Phase 2 — Core Infrastructure (4–6 weeks)
+  - Complete actual TS IPC contracts (products, sales, settings, printer, mpesa, export)
+  - Migrate DB layer to TS with type-safe DAOs
+  - Implement authentication (PIN-based cashier login) and role management (admin vs cashier)
+  - Inventory management: full CRUD and stock history
+- Phase 3 — MVP Modernization (4–6 weeks)
+  - End-of-day reports with charts; exportable dashboards
+  - Customer-facing display mode; multi-currency display
+  - Audit logs, user activity trails
+  - Global design system with component library, data tables, modals, toasts
+- Phase 4 — Quality & Readiness (ongoing)
+  - E2E tests, unit tests, linting, type checking
+  - Production build pipeline, CI, deployment notes
+  - Documentation (ARCHITECTURE.md, ROADMAP.md, DECISIONS.md)
 
-```
-duka-pos/
-├── .gitignore
-├── dist/                 (Production build output)
-├── docs/                 (Documentation for users, developers)
-│   ├── how-to-print.md
-│   └── license-guide.md
-├── index.html            (Main HTML entry point)
-├── package.json          (Project dependencies and scripts)
-├── planning/             (Project planning artifacts)
-│   ├── pos-mvp.md        (Project overview and iteration plan)
-│   ├── decisions.md      (Architecture Decision Records)
-│   ├── roadmap.md        (Milestones and timeline)
-│   └── backlog.md        (Task backlog)
-├── projects/             (Separate project workspace)
-│   └── duka-pos/         (Actual Duka POS application code)
-│       ├── assets/         (Icons, images)
-│       ├── src/
-│       │   ├── db/           (Database initialization and schema)
-│       │   │   ├── init.js
-│       │   │   └── schema.sql
-│       │   ├── ipc/          (Main process IPC handlers)
-│       │   │   ├── index.js    (IPC registration)
-│       │   │   ├── products.js
-│       │   │   ├── sales.js
-│       │   │   ├── ... (settings, printer, mpesa, export handlers)
-│       │   ├── main/         (Electron main process)
-│       │   │   ├── main.js
-│       │   │   └── preload.js
-│       │   ├── payments/     (M-Pesa integration logic)
-│       │   │   └── mpesa.js
-│       │   ├── printer/      (ESC/POS printer logic)
-│       │   │   └── escpos.js
-│       │   └── renderer/     (Renderer process bootstrapping)
-│       │       ├── main.jsx    (React app entry)
-│       │       ├── index.html  (Not used in dev, but for prod build)
-│       │       └── styles.css
-│       ├── src/ui/         (Reusable UI components)
-│       │   └── SalesRegister.jsx
-│       ├── tests/          (Unit and integration tests)
-│       │   ├── unit/
-│       │   └── integration/
-│       └── App.jsx         (Main React application component)
-├── .gitignore
-├── README.md
-└── ... (other config files like .eslintrc.js, tsconfig.json for future)
-```
+## How to run locally (pre-TS migration path)
+- Install dependencies: npm install
+- Run: npm run dev
+- Electron app will boot and seed the local SQLite DB on first run
 
-## Installation and Running Locally (Development)
+## Next steps (after this readme is merged)
+- Begin Phase 1 TS migration and enterprise folder layout, aligning with the plan above
+- Implement strict typing and path aliasing
+- Build the enterprise UI with a robust design system and authentication
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <repository-url>
-    cd duka-pos
-    ```
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
-3.  **Start the development server:**
-    ```bash
-    npm run dev
-    ```
-    This will launch the Electron app with hot-reloading. The database (`duka-pos.db`) will be created in your user data directory upon first run, and sample products will be seeded if the table is empty.
+## Contributing
+- Follow the enterprise folder guidelines, add ADRs for decisions, and keep TS typings strict
+- Add tests and CI hooks as early as possible
 
-## MVP Status
-
-The current MVP provides a functional sales register with a product grid, cart, and checkout (cash payment). It includes essential back-end logic for product/inventory management and sales recording via SQLite. Printer and M-Pesa functionalities are currently in placeholder/stub states.
-
-## Future Development
-
-See `planning/pos-mvp/BACKLOG.md` for detailed task breakdown.
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		'
+"}
