@@ -1,6 +1,6 @@
 // TS Sales IPC handlers — full transaction for sale creation
 import { Database } from 'better-sqlite3';
-import { Sale, SaleItem } from '@/shared/types';
+import { SaleItem } from '@/shared/types';
 
 export function registerSalesHandlers(ipc: any, db: any) {
   ipc.handle('sales:create', (_, sale: { items: SaleItem[]; payment_method: string; taxRate?: number; discount?: number; }) => {
