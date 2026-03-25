@@ -69,9 +69,18 @@ CREATE TABLE mpesa_queue (
   updated_at          TEXT    NOT NULL DEFAULT (datetime('now','localtime'))
 );
 
+CREATE TABLE audit_logs (
+  id          INTEGER PRIMARY KEY,
+  event       TEXT    NOT NULL,
+  user        TEXT,
+  details     TEXT,
+  timestamp   TEXT    NOT NULL DEFAULT (datetime('now','localtime'))
+);
+
 -- Indexes for common queries
 CREATE INDEX IF NOT EXISTS idx_sales_date ON sales(date_time);
 CREATE INDEX IF NOT EXISTS idx_sale_items_sale ON sale_items(sale_id);
 CREATE INDEX IF NOT EXISTS idx_inventory_product ON inventory_logs(product_id);
 CREATE INDEX IF NOT EXISTS idx_mpesa_queue_status ON mpesa_queue(status);
 CREATE INDEX IF NOT EXISTS idx_products_active ON products(is_active);
+CREATE INDEX IF NOT EXISTS idx_audit_timestamp ON audit_logs(timestamp);
